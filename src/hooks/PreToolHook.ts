@@ -2,6 +2,7 @@ import type { PreHookContext, PreHookResult } from "./types"
 import { IntentManager } from "./IntentManager"
 import { ContentHasher } from "./ContentHasher"
 import { AuthorizationManager } from "./AuthorizationManager"
+import { IntentIgnoreParser } from "./IntentIgnoreParser"
 import * as fs from "fs"
 import * as path from "path"
 
@@ -27,6 +28,7 @@ export class PreToolHook {
 
 			const workspacePath = context.task.cwd
 			const intentManager = new IntentManager(workspacePath)
+			const intentIgnore = new IntentIgnoreParser(workspacePath)
 			const activeIntent = await intentManager.getActiveIntent()
 
 			if (!activeIntent) {
@@ -35,6 +37,13 @@ export class PreToolHook {
 			}
 
 			const filePath = context.params?.path || context.params?.file_path
+
+			// Check .intentignore
+			if (filePath && intentIgnore.shouldIgnore(filePath)) {
+				console.log(`[PreToolHook] File ${filePath} in .intentignore - allowing without scope check`)
+				return { blocked: false }
+			}
+
 			if (filePath && !intentManager.isFileInScope(filePath, activeIntent)) {
 				console.log(`[PreToolHook] File ${filePath} out of scope - blocking`)
 				return { blocked: true }
@@ -43,10 +52,13 @@ export class PreToolHook {
 			// UI Authorization: Request human approval for destructive operations
 			if (filePath && AuthorizationManager.isEnabled()) {
 				const approved = await AuthorizationManager.requestAuthorization(context.toolName, filePath)
+				;(context.task as any).lastAuthorized = approved
 				if (!approved) {
 					console.log(`[PreToolHook] User rejected ${context.toolName} on ${filePath}`)
 					return { blocked: true, reason: "User rejected operation" }
 				}
+			} else {
+				;(context.task as any).lastAuthorized = undefined
 			}
 
 			// Calculate content hash of current file for optimistic locking
@@ -60,10 +72,13 @@ export class PreToolHook {
 					const lastKnownHash = (context.task as any).lastKnownHash?.[filePath]
 					if (lastKnownHash && lastKnownHash !== currentHash) {
 						console.log(`[PreToolHook] STALE FILE DETECTED: ${filePath} modified by another agent`)
+						;(context.task as any).lastStaleDetected = true
 						return {
 							blocked: true,
 							reason: `File ${filePath} was modified by another agent. Please re-read the file first.`,
 						}
+					} else {
+						;(context.task as any).lastStaleDetected = false
 					}
 
 					// Store hash in task for PostToolHook to verify

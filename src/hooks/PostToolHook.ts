@@ -1,6 +1,8 @@
 import type { PostHookContext } from "./types"
 import { TraceLogger } from "./TraceLogger"
 import { ContentHasher } from "./ContentHasher"
+import { IntentMapGenerator } from "./IntentMapGenerator"
+import { SharedBrainManager } from "./SharedBrainManager"
 import * as fs from "fs"
 import * as path from "path"
 
@@ -14,6 +16,8 @@ export class PostToolHook {
 
 			const workspacePath = context.task.cwd
 			const logger = new TraceLogger(workspacePath)
+			const intentMap = new IntentMapGenerator(workspacePath)
+			const sharedBrain = new SharedBrainManager(workspacePath)
 
 			const filePath = context.params?.path || context.params?.file_path
 
@@ -44,12 +48,25 @@ export class PostToolHook {
 			}
 
 			const selectedIntentId = (context.task as any).selectedIntentId
-			await logger.log({
-				toolName: context.toolName,
-				filePath,
+
+			// Update intent map
+			if (filePath && selectedIntentId) {
+				const intentManager = await import("./IntentManager").then((m) => new m.IntentManager(workspacePath))
+				const activeIntent = await intentManager.getActiveIntent()
+				if (activeIntent) {
+					await intentMap.update(selectedIntentId, activeIntent.description, filePath)
+				}
+			}
+
+			// Log with enhanced schema
+			await logger.logEnhanced({
+				filePath: filePath || "unknown",
 				contentHash,
+				intentId: selectedIntentId,
+				toolName: context.toolName,
 				mutationClass,
-				intentId: selectedIntentId || "none",
+				authorized: (context.task as any).lastAuthorized,
+				staleDetected: (context.task as any).lastStaleDetected,
 				result: context.result,
 			})
 		} catch (error) {
