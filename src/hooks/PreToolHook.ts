@@ -1,6 +1,7 @@
 import type { PreHookContext, PreHookResult } from "./types"
 import { IntentManager } from "./IntentManager"
 import { ContentHasher } from "./ContentHasher"
+import { AuthorizationManager } from "./AuthorizationManager"
 import * as fs from "fs"
 import * as path from "path"
 
@@ -39,12 +40,32 @@ export class PreToolHook {
 				return { blocked: true }
 			}
 
+			// UI Authorization: Request human approval for destructive operations
+			if (filePath && AuthorizationManager.isEnabled()) {
+				const approved = await AuthorizationManager.requestAuthorization(context.toolName, filePath)
+				if (!approved) {
+					console.log(`[PreToolHook] User rejected ${context.toolName} on ${filePath}`)
+					return { blocked: true, reason: "User rejected operation" }
+				}
+			}
+
 			// Calculate content hash of current file for optimistic locking
 			if (filePath) {
 				const fullPath = path.join(context.task.cwd, filePath)
 				if (fs.existsSync(fullPath)) {
 					const currentContent = fs.readFileSync(fullPath, "utf-8")
 					const currentHash = ContentHasher.hash(currentContent)
+
+					// Stale file detection: Check if file changed since last read
+					const lastKnownHash = (context.task as any).lastKnownHash?.[filePath]
+					if (lastKnownHash && lastKnownHash !== currentHash) {
+						console.log(`[PreToolHook] STALE FILE DETECTED: ${filePath} modified by another agent`)
+						return {
+							blocked: true,
+							reason: `File ${filePath} was modified by another agent. Please re-read the file first.`,
+						}
+					}
+
 					// Store hash in task for PostToolHook to verify
 					;(context.task as any).preWriteHash = currentHash
 					console.log(`[PreToolHook] Pre-write hash: ${currentHash.substring(0, 12)}...`)

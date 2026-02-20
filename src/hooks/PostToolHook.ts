@@ -27,6 +27,12 @@ export class PostToolHook {
 					const newContent = fs.readFileSync(fullPath, "utf-8")
 					contentHash = ContentHasher.hash(newContent)
 
+					// Store hash for stale file detection
+					if (!(context.task as any).lastKnownHash) {
+						;(context.task as any).lastKnownHash = {}
+					}
+					;(context.task as any).lastKnownHash[filePath] = contentHash
+
 					const preHash = (context.task as any).preWriteHash
 					if (preHash && preHash !== contentHash) {
 						const selectedIntentId = (context.task as any).selectedIntentId

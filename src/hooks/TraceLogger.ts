@@ -9,6 +9,8 @@ interface TraceEntry {
 	contentHash?: string
 	mutationClass?: string
 	intentId?: string
+	authorized?: boolean
+	staleDetected?: boolean
 	result: string
 }
 
