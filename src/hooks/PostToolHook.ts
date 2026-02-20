@@ -23,7 +23,7 @@ export class PostToolHook {
 
 			if (filePath) {
 				const fullPath = path.join(workspacePath, filePath)
-				if (fs.existsSync(fullPath)) {
+				if (fs.existsSync(fullPath) && fs.statSync(fullPath).isFile()) {
 					const newContent = fs.readFileSync(fullPath, "utf-8")
 					contentHash = ContentHasher.hash(newContent)
 
