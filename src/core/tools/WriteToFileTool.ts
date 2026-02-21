@@ -55,6 +55,32 @@ export class WriteToFileTool extends BaseTool<"write_to_file"> {
 			return
 		}
 
+		// Check intent scope
+		if (task.intentManager) {
+			const activeIntent = await task.intentManager.getActiveIntent()
+			if (activeIntent && !task.intentManager.isFileInScope(relPath, activeIntent)) {
+				const errorMsg = `File ${relPath} is out of scope for intent '${activeIntent.id}'. Allowed scope: ${(activeIntent.owned_scope || activeIntent.scope || []).join(", ")}`
+				await task.say("error", errorMsg)
+				pushToolResult(errorMsg)
+				return
+			}
+		}
+
+		// Check for stale file
+		if (task.staleDetector) {
+			const absolutePath = path.resolve(task.cwd, relPath)
+			const fileExists = await fileExistsAtPath(absolutePath)
+			if (fileExists) {
+				const isStale = await task.staleDetector.isStale(relPath)
+				if (isStale) {
+					const errorMsg = `File ${relPath} has been modified by another agent or external process. Please re-read the file before modifying.`
+					await task.say("error", errorMsg)
+					pushToolResult(errorMsg)
+					return
+				}
+			}
+		}
+
 		const isWriteProtected = task.rooProtectedController?.isWriteProtected(relPath) || false
 
 		let fileExists: boolean
@@ -171,6 +197,38 @@ export class WriteToFileTool extends BaseTool<"write_to_file"> {
 
 			if (relPath) {
 				await task.fileContextTracker.trackFileContext(relPath, "roo_edited" as RecordSource)
+			}
+
+			// Log to trace with content hash
+			if (task.traceLogger) {
+				const { ContentHasher } = await import("../../hooks/ContentHasher")
+				const { MutationClassifier } = await import("../../hooks/MutationClassifier")
+				const contentHash = ContentHasher.hash(newContent)
+				const activeIntent = task.intentManager ? await task.intentManager.getActiveIntent() : null
+
+				// Classify mutation
+				const oldContent = fileExists ? task.diffViewProvider.originalContent || "" : ""
+				const mutationClass = MutationClassifier.classify(oldContent, newContent)
+
+				await task.traceLogger.logEnhanced({
+					filePath: relPath,
+					contentHash: `sha256:${contentHash}`,
+					intentId: activeIntent?.id,
+					toolName: "write_to_file",
+					mutationClass,
+					authorized: true,
+					result: "success",
+				})
+
+				// Update intent map
+				if (task.intentMapGenerator && activeIntent) {
+					await task.intentMapGenerator.update(activeIntent.id, relPath)
+				}
+
+				// Update stale detector snapshot
+				if (task.staleDetector) {
+					await task.staleDetector.captureSnapshot(relPath)
+				}
 			}
 
 			task.didEditFile = true

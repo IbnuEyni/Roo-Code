@@ -11,7 +11,19 @@ export function getAvailableIntentsSection(cwd: string): string {
 		}
 
 		const content = fs.readFileSync(intentsPath, "utf-8")
-		const intents = yaml.parse(content)
+		const parsed = yaml.parse(content)
+
+		// Support both formats:
+		// Legacy: array of intents directly
+		// Spec-driven: { active_intents: [...] }
+		let intents: any[]
+		if (Array.isArray(parsed)) {
+			intents = parsed
+		} else if (parsed && parsed.active_intents && Array.isArray(parsed.active_intents)) {
+			intents = parsed.active_intents
+		} else {
+			return "" // No valid intents found
+		}
 
 		if (!intents || intents.length === 0) {
 			return ""
@@ -20,10 +32,12 @@ export function getAvailableIntentsSection(cwd: string): string {
 		let section = `====\n\nAVAILABLE INTENTS\n\nThe following intents are available in this workspace. When the user requests a task that involves writing code, analyze these intents and select the most appropriate one:\n\n`
 
 		for (const intent of intents) {
+			const scopePatterns = intent.owned_scope || intent.scope || []
 			section += `Intent ID: ${intent.id}\n`
+			section += `Name: ${intent.name || intent.description}\n`
 			section += `Description: ${intent.description}\n`
-			section += `Scope: ${intent.scope.join(", ")}\n`
-			section += `Status: ${intent.status}\n\n`
+			section += `Scope: ${scopePatterns.join(", ")}\n`
+			section += `Status: ${intent.status || "ACTIVE"}\n\n`
 		}
 
 		section += `When you need to write code, first call select_active_intent with the intent_id that best matches the user's task. Choose based on:\n`

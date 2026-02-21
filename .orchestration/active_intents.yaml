@@ -1,21 +1,25 @@
-- id: "auth-system"
-  description: "Implement user authentication and authorization system"
-  scope:
-      - "src/auth/**"
-      - "src/middleware/auth.ts"
+- id: "math-functions"
+  name: "Math Functions"
+  description: "Implement basic math operations"
   status: "active"
+  owned_scope:
+      - "src/math/"
+  constraints:
+      - "Only mathematical operations"
+      - "No text manipulation"
+  acceptance_criteria:
+      - "Functions work correctly"
+      - "Files in src/math/ only"
 
-- id: "api-endpoints"
-  description: "Build REST API endpoints for user management"
-  scope:
-      - "src/api/**"
-      - "src/routes/**"
+- id: "text-functions"
+  name: "Text Functions"
+  description: "Implement text manipulation utilities"
   status: "active"
-
-- id: "database-layer"
-  description: "Create database models and migrations"
-  scope:
-      - "src/models/**"
-      - "src/migrations/**"
-      - "src/database/**"
-  status: "active"
+  owned_scope:
+      - "src/text/"
+  constraints:
+      - "Only text operations"
+      - "No math operations"
+  acceptance_criteria:
+      - "Functions work correctly"
+      - "Files in src/text/ only"

@@ -554,6 +554,13 @@ export class NativeToolCallParser {
 				}
 				break
 
+			case "select_active_intent":
+				if (partialArgs.intent_id !== undefined) {
+					nativeArgs = {
+						intent_id: partialArgs.intent_id,
+					}
+				}
+				break
 			case "use_mcp_tool":
 				if (partialArgs.server_name !== undefined || partialArgs.tool_name !== undefined) {
 					nativeArgs = {
@@ -889,6 +896,13 @@ export class NativeToolCallParser {
 					}
 					break
 
+				case "select_active_intent":
+					if (args.intent_id !== undefined) {
+						nativeArgs = {
+							intent_id: args.intent_id,
+						} as NativeArgsFor<TName>
+					}
+					break
 				case "read_command_output":
 					if (args.artifact_id !== undefined) {
 						nativeArgs = {

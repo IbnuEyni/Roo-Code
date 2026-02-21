@@ -54,7 +54,7 @@ export class PostToolHook {
 				const intentManager = await import("./IntentManager").then((m) => new m.IntentManager(workspacePath))
 				const activeIntent = await intentManager.getActiveIntent()
 				if (activeIntent) {
-					await intentMap.update(selectedIntentId, activeIntent.description, filePath)
+					await intentMap.update(selectedIntentId, filePath)
 				}
 			}
 

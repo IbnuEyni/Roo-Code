@@ -1,58 +1,54 @@
 # Intent Ignore Patterns
-# Files and directories to exclude from intent scope validation
+# Files and directories matching these patterns are excluded from intent scope validation
 
 # Dependencies
 node_modules/
-.pnpm-store/
-package-lock.json
-pnpm-lock.yaml
+vendor/
+.pnp/
+.pnp.js
 
 # Build outputs
 dist/
 build/
 out/
-*.js.map
-*.d.ts
+.next/
+.turbo/
 
-# IDE and editor files
+# Cache
+.cache/
+*.log
+.npm/
+.yarn/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
 
-# Test files (allow tests to be written anywhere)
-**/*.test.ts
-**/*.spec.ts
-**/__tests__/**
-**/test/**
-**/tests/**
+# Version control
+.git/
+.svn/
+.hg/
 
-# Documentation (allow docs anywhere)
-docs/
+# Documentation (optional - remove if you want docs in scope)
 *.md
 README*
 CHANGELOG*
 LICENSE*
 
-# Configuration files (allow config anywhere)
-*.config.js
-*.config.ts
-.env*
-.eslintrc*
-.prettierrc*
-tsconfig.json
+# Config files (optional - remove if you want config in scope)
+*.json
+*.yaml
+*.yml
+*.toml
+*.ini
 
-# Git and version control
-.git/
-.gitignore
-.gitattributes
-
-# Logs and temporary files
-*.log
-*.tmp
-.DS_Store
-Thumbs.db
-
-# Orchestration files (system managed)
+# Orchestration (always excluded)
 .orchestration/
