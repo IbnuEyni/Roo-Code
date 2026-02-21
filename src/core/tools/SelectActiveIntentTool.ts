@@ -15,7 +15,13 @@ export const selectActiveIntentTool = {
 		},
 	): Promise<void> {
 		try {
+			console.log(`[SelectActiveIntentTool] Received params:`, JSON.stringify(params))
 			console.log(`[SelectActiveIntentTool] Loading intent: ${params.intent_id}`)
+
+			if (!params || !params.intent_id) {
+				callbacks.pushToolResult(`Error: No intent_id provided. Please specify an intent_id parameter.`)
+				return
+			}
 
 			const intentManager = new IntentManager(task.cwd)
 			const intents = await intentManager.loadIntents()

@@ -24,6 +24,7 @@ import {
 	markdownFormattingSection,
 	getSkillsSection,
 } from "./sections"
+import { getAvailableIntentsSection } from "./sections/available-intents"
 
 // Helper function to get prompt component, filtering out empty objects
 export function getPromptComponent(
@@ -97,6 +98,8 @@ ${skillsSection ? `\n${skillsSection}` : ""}
 ${getRulesSection(cwd, settings)}
 
 ${getSystemInfoSection(cwd)}
+
+${getAvailableIntentsSection(cwd)}
 
 ${getObjectiveSection()}
 

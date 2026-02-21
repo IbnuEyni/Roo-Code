@@ -1,5 +1,21 @@
-- id: "intent-001"
-  description: "Add hook system to Roo Code"
+- id: "auth-system"
+  description: "Implement user authentication and authorization system"
   scope:
-    - "src/hooks/"
-    - "src/core/assistant-message/"
+      - "src/auth/**"
+      - "src/middleware/auth.ts"
+  status: "active"
+
+- id: "api-endpoints"
+  description: "Build REST API endpoints for user management"
+  scope:
+      - "src/api/**"
+      - "src/routes/**"
+  status: "active"
+
+- id: "database-layer"
+  description: "Create database models and migrations"
+  scope:
+      - "src/models/**"
+      - "src/migrations/**"
+      - "src/database/**"
+  status: "active"

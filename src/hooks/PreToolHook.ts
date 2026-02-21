@@ -23,7 +23,10 @@ export class PreToolHook {
 			const selectedIntentId = (context.task as any).selectedIntentId
 			if (!selectedIntentId) {
 				console.log("[PreToolHook] No intent selected - blocking write operation")
-				return { blocked: true }
+				return {
+					blocked: true,
+					reason: "You must call select_active_intent before performing write operations",
+				}
 			}
 
 			const workspacePath = context.task.cwd
@@ -32,8 +35,8 @@ export class PreToolHook {
 			const activeIntent = await intentManager.getActiveIntent()
 
 			if (!activeIntent) {
-				console.log("[PreToolHook] No active intent - allowing")
-				return { blocked: false }
+				console.log("[PreToolHook] No active intent found in YAML - blocking")
+				return { blocked: true, reason: "No active intent found in active_intents.yaml" }
 			}
 
 			const filePath = context.params?.path || context.params?.file_path
