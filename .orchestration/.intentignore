@@ -1,0 +1,54 @@
+# Intent Ignore Patterns
+# Files and directories matching these patterns are excluded from intent scope validation
+
+# Dependencies
+node_modules/
+vendor/
+.pnp/
+.pnp.js
+
+# Build outputs
+dist/
+build/
+out/
+.next/
+.turbo/
+
+# Cache
+.cache/
+*.log
+.npm/
+.yarn/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Version control
+.git/
+.svn/
+.hg/
+
+# Documentation (optional - remove if you want docs in scope)
+*.md
+README*
+CHANGELOG*
+LICENSE*
+
+# Config files (optional - remove if you want config in scope)
+*.json
+*.yaml
+*.yml
+*.toml
+*.ini
+
+# Orchestration (always excluded)
+.orchestration/

@@ -15,7 +15,13 @@ export const selectActiveIntentTool = {
 		},
 	): Promise<void> {
 		try {
+			console.log(`[SelectActiveIntentTool] Received params:`, JSON.stringify(params))
 			console.log(`[SelectActiveIntentTool] Loading intent: ${params.intent_id}`)
+
+			if (!params || !params.intent_id) {
+				callbacks.pushToolResult(`Error: No intent_id provided. Please specify an intent_id parameter.`)
+				return
+			}
 
 			const intentManager = new IntentManager(task.cwd)
 			const intents = await intentManager.loadIntents()
@@ -31,13 +37,30 @@ export const selectActiveIntentTool = {
 			// Store selected intent in task for PreHook to check
 			;(task as any).selectedIntentId = params.intent_id
 
-			// Build context XML
+			// Build context XML with spec-driven metadata
+			const scopePatterns = intent.owned_scope || intent.scope || []
 			const contextXml = `<intent_context>
   <intent_id>${intent.id}</intent_id>
+  <name>${intent.name || intent.description}</name>
+  <status>${intent.status || "ACTIVE"}</status>
   <description>${intent.description}</description>
-  <scope>
-${intent.scope.map((s) => `    - ${s}`).join("\n")}
-  </scope>
+  <owned_scope>
+${scopePatterns.map((s) => `    - ${s}`).join("\n")}
+  </owned_scope>
+${
+	intent.constraints
+		? `  <constraints>
+${intent.constraints.map((c) => `    - ${c}`).join("\n")}
+  </constraints>`
+		: ""
+}
+${
+	intent.acceptance_criteria
+		? `  <acceptance_criteria>
+${intent.acceptance_criteria.map((a) => `    - ${a}`).join("\n")}
+  </acceptance_criteria>`
+		: ""
+}
 </intent_context>`
 
 			callbacks.pushToolResult(

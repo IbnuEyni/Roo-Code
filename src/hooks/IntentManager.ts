@@ -4,8 +4,15 @@ import yaml from "yaml"
 
 interface Intent {
 	id: string
+	name?: string
 	description: string
-	scope: string[]
+	status?: string
+	scope?: string[] // Legacy format
+	owned_scope?: string[] // Spec-driven format
+	constraints?: string[]
+	acceptance_criteria?: string[]
+	created_at?: string
+	updated_at?: string
 }
 
 export class IntentManager {
@@ -20,12 +27,22 @@ export class IntentManager {
 		try {
 			console.log(`[IntentManager] Loading intents from: ${this.intentFilePath}`)
 			const content = await fs.readFile(this.intentFilePath, "utf-8")
-			console.log(`[IntentManager] File content: ${content}`)
 			const parsed = yaml.parse(content)
-			console.log(`[IntentManager] Parsed YAML:`, parsed)
-			console.log(`[IntentManager] Is array?`, Array.isArray(parsed))
-			this.cachedIntents = Array.isArray(parsed) ? parsed : []
-			console.log(`[IntentManager] Cached intents:`, this.cachedIntents)
+
+			// Support both formats:
+			// Legacy: array of intents directly
+			// Spec-driven: { active_intents: [...] }
+			let intents: Intent[]
+			if (Array.isArray(parsed)) {
+				intents = parsed
+			} else if (parsed && parsed.active_intents && Array.isArray(parsed.active_intents)) {
+				intents = parsed.active_intents
+			} else {
+				intents = []
+			}
+
+			console.log(`[IntentManager] Loaded ${intents.length} intents`)
+			this.cachedIntents = intents
 			return this.cachedIntents
 		} catch (error) {
 			console.log(`[IntentManager] Error loading intents:`, error)
@@ -40,7 +57,13 @@ export class IntentManager {
 	}
 
 	isFileInScope(filePath: string, intent: Intent): boolean {
-		if (!intent.scope || intent.scope.length === 0) return true
-		return intent.scope.some((pattern) => filePath.includes(pattern))
+		// Support both scope (legacy) and owned_scope (spec-driven)
+		const scopePatterns = intent.owned_scope || intent.scope || []
+		if (scopePatterns.length === 0) return true
+		return scopePatterns.some((pattern) => {
+			// Remove /** suffix for matching
+			const cleanPattern = pattern.replace(/\/\*\*$/, "")
+			return filePath.startsWith(cleanPattern) || filePath.includes(cleanPattern)
+		})
 	}
 }

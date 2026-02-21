@@ -1,5 +1,25 @@
-- id: "intent-001"
-  description: "Add hook system to Roo Code"
-  scope:
-    - "src/hooks/"
-    - "src/core/assistant-message/"
+- id: "math-functions"
+  name: "Math Functions"
+  description: "Implement basic math operations"
+  status: "active"
+  owned_scope:
+      - "src/math/"
+  constraints:
+      - "Only mathematical operations"
+      - "No text manipulation"
+  acceptance_criteria:
+      - "Functions work correctly"
+      - "Files in src/math/ only"
+
+- id: "text-functions"
+  name: "Text Functions"
+  description: "Implement text manipulation utilities"
+  status: "active"
+  owned_scope:
+      - "src/text/"
+  constraints:
+      - "Only text operations"
+      - "No math operations"
+  acceptance_criteria:
+      - "Functions work correctly"
+      - "Files in src/text/ only"

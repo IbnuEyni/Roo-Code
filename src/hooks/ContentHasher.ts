@@ -1,4 +1,4 @@
-import crypto from "crypto"
+import * as crypto from "crypto"
 
 export class ContentHasher {
 	static hash(content: string): string {

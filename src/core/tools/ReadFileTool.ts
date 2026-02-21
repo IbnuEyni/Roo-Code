@@ -220,6 +220,11 @@ export class ReadFileTool extends BaseTool<"read_file"> {
 
 					await task.fileContextTracker.trackFileContext(relPath, "read_tool" as RecordSource)
 
+					// Capture snapshot for stale detection
+					if (task.staleDetector) {
+						await task.staleDetector.captureSnapshot(relPath)
+					}
+
 					updateFileResult(relPath, {
 						nativeContent: `File: ${relPath}\n${result}`,
 					})

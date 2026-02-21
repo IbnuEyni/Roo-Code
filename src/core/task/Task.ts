@@ -132,6 +132,10 @@ import { AutoApprovalHandler, checkAutoApproval } from "../auto-approval"
 import { MessageManager } from "../message-manager"
 import { validateAndFixToolResultIds } from "./validateToolResultIds"
 import { mergeConsecutiveApiMessages } from "./mergeConsecutiveApiMessages"
+import { IntentManager } from "../../hooks/IntentManager"
+import { TraceLogger } from "../../hooks/TraceLogger"
+import { StaleDetector } from "../../hooks/StaleDetector"
+import { IntentMapGenerator } from "../../hooks/IntentMapGenerator"
 
 const MAX_EXPONENTIAL_BACKOFF_SECONDS = 600 // 10 minutes
 const DEFAULT_USAGE_COLLECTION_TIMEOUT_MS = 5000 // 5 seconds
@@ -298,6 +302,10 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 	toolRepetitionDetector: ToolRepetitionDetector
 	rooIgnoreController?: RooIgnoreController
 	rooProtectedController?: RooProtectedController
+	intentManager?: any
+	traceLogger?: any
+	staleDetector?: any
+	intentMapGenerator?: any
 	fileContextTracker: FileContextTracker
 	terminalProcess?: RooTerminalProcess
 
@@ -481,6 +489,10 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 
 		this.rooIgnoreController = new RooIgnoreController(this.cwd)
 		this.rooProtectedController = new RooProtectedController(this.cwd)
+		this.intentManager = new IntentManager(this.cwd)
+		this.traceLogger = new TraceLogger(this.cwd)
+		this.staleDetector = new StaleDetector(this.cwd)
+		this.intentMapGenerator = new IntentMapGenerator(this.cwd)
 		this.fileContextTracker = new FileContextTracker(provider, this.taskId)
 
 		this.rooIgnoreController.initialize().catch((error) => {
