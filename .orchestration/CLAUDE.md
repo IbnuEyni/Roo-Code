@@ -2,46 +2,50 @@
 
 ## Current Active Intents
 
-### auth-system
+### math-functions (IN_PROGRESS)
 
-- **Description**: Implement user authentication and authorization system
-- **Scope**: src/auth/\*\*, src/middleware/auth.ts
-- **Status**: Active
-- **Owner**: Available for assignment
+- **Name**: Math Functions
+- **Owned Scope**: src/math/\*\*
+- **Purpose**: Create simple math functions (add, subtract, multiply, divide)
+- **Constraints**: Keep functions simple and pure
+- **Status**: Ready for development
 
-### api-endpoints
+### text-functions (IN_PROGRESS)
 
-- **Description**: Build REST API endpoints for user management
-- **Scope**: src/api/**, src/routes/**
-- **Status**: Active
-- **Owner**: Available for assignment
-
-### database-layer
-
-- **Description**: Create database models and migrations
-- **Scope**: src/models/**, src/migrations/**, src/database/\*\*
-- **Status**: Active
-- **Owner**: Available for assignment
+- **Name**: Text Functions
+- **Owned Scope**: src/text/\*\*
+- **Purpose**: Create text manipulation functions (capitalize, reverse, trim)
+- **Constraints**: Handle empty strings gracefully
+- **Status**: Ready for development
 
 ## Agent Coordination Rules
 
-1. **Select Intent First**: Always call select_active_intent before write operations
-2. **Respect Scope**: Only modify files within your intent's scope
-3. **Check This File**: Read this file before starting work to avoid conflicts
-4. **Update Progress**: Write notes here when completing major changes
-5. **Stale Detection**: If blocked by stale file, re-read and merge changes
+1. **Select Intent First**: Call select_active_intent before any write operations
+2. **Respect Scope**: Only modify files within your intent's owned_scope
+3. **Stay Focused**: math-functions → src/math/ only, text-functions → src/text/ only
+4. **No Scope Creep**: If blocked, you're outside your scope - select correct intent
 
-## Session Notes
+## Demo Notes
 
-### Demo Session
+This is a demonstration workspace showing:
 
-- Demonstrating Intent-Code Traceability System
-- Testing intelligent intent selection
-- Verifying scope enforcement and stale detection
-- All features operational
+- Intelligent intent selection (agent picks right intent automatically)
+- Scope enforcement (agent blocked when crossing boundaries)
+- Cryptographic traceability (SHA-256 hashing of all changes)
+- Stale detection (optimistic locking prevents lost updates)
 
-## Recent Activity
+## Quick Examples
 
-- System initialized with 3 realistic intents
-- Ready for multi-agent demonstration
-- Trace logging active in agent_trace.jsonl
+**Math Intent**:
+
+- Create src/math/add.ts → ✅ Allowed
+- Create src/text/helper.ts → ❌ Blocked (out of scope)
+
+**Text Intent**:
+
+- Create src/text/capitalize.ts → ✅ Allowed
+- Create src/math/multiply.ts → ❌ Blocked (out of scope)
+
+## Session Log
+
+Ready for demo recording. All systems operational.
